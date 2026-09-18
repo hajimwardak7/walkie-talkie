@@ -1,0 +1,811 @@
+/* =====================================================
+   WALKIE TALKIE - STYLE
+===================================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+html {
+    scroll-behavior: smooth;
+}
+
+
+body {
+
+    font-family:
+        Arial,
+        Tahoma,
+        sans-serif;
+
+    background:
+        linear-gradient(
+            180deg,
+            #07111f 0%,
+            #0d1b2a 45%,
+            #10263b 100%
+        );
+
+    color: white;
+
+    min-height: 100vh;
+
+    direction: rtl;
+
+}
+
+
+/* =====================================================
+   APP
+===================================================== */
+
+.app {
+
+    width: 100%;
+
+    max-width: 520px;
+
+    min-height: 100vh;
+
+    margin: 0 auto;
+
+    padding:
+        15px
+        15px
+        30px
+        15px;
+
+}
+
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.top-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding:
+        10px
+        5px
+        18px
+        5px;
+
+}
+
+
+.logo-area {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+}
+
+
+.logo {
+
+    width: 52px;
+
+    height: 52px;
+
+    border-radius: 16px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 28px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #1677ff,
+            #00b4ff
+        );
+
+    box-shadow:
+        0 8px 25px
+        rgba(0, 140, 255, 0.30);
+
+}
+
+
+.logo-area h1 {
+
+    font-size: 22px;
+
+    font-weight: 800;
+
+    letter-spacing: 0.2px;
+
+}
+
+
+.logo-area p {
+
+    margin-top: 4px;
+
+    font-size: 12px;
+
+    color: #9eb3c8;
+
+}
+
+
+.language-button {
+
+    width: 44px;
+
+    height: 44px;
+
+    border: none;
+
+    border-radius: 14px;
+
+    background:
+        rgba(255,255,255,0.08);
+
+    color: white;
+
+    font-size: 20px;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+
+}
+
+
+.language-button:active {
+
+    transform: scale(0.92);
+
+}
+
+
+/* =====================================================
+   ONLINE STATUS
+===================================================== */
+
+.status-box {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding:
+        11px
+        14px;
+
+    border-radius: 14px;
+
+    background:
+        rgba(255,255,255,0.06);
+
+    border:
+        1px solid
+        rgba(255,255,255,0.07);
+
+    color: #c8d7e5;
+
+    font-size: 14px;
+
+    margin-bottom: 14px;
+
+}
+
+
+.status-box #userCount {
+
+    margin-right: auto;
+
+    color: #9fb4c8;
+
+}
+
+
+.online-dot {
+
+    width: 10px;
+
+    height: 10px;
+
+    border-radius: 50%;
+
+    background: #21e67a;
+
+    box-shadow:
+        0 0 10px
+        rgba(33,230,122,0.8);
+
+}
+
+
+/* =====================================================
+   CHANNEL BOX
+===================================================== */
+
+.channel-box {
+
+    text-align: center;
+
+    padding:
+        18px
+        12px;
+
+    border-radius: 22px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(16,113,220,0.25),
+            rgba(255,255,255,0.05)
+        );
+
+    border:
+        1px solid
+        rgba(65,155,255,0.18);
+
+    box-shadow:
+        0 15px 40px
+        rgba(0,0,0,0.18);
+
+}
+
+
+.small-title {
+
+    color: #8fa8be;
+
+    font-size: 13px;
+
+    margin-bottom: 7px;
+
+}
+
+
+.channel-box h2 {
+
+    font-size: 23px;
+
+    color: #ffffff;
+
+    word-break: break-word;
+
+}
+
+
+/* =====================================================
+   VOICE AREA
+===================================================== */
+
+.voice-area {
+
+    text-align: center;
+
+    padding:
+        30px
+        10px
+        24px;
+
+}
+
+
+.talk-info {
+
+    color: #91a9bd;
+
+    font-size: 14px;
+
+    margin-bottom: 22px;
+
+}
+
+
+/* =====================================================
+   MICROPHONE BUTTON
+===================================================== */
+
+.mic-button {
+
+    width: 190px;
+
+    height: 190px;
+
+    border: none;
+
+    border-radius: 50%;
+
+    background:
+        linear-gradient(
+            145deg,
+            #1683ff,
+            #0757c9
+        );
+
+    color: white;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    margin: 0 auto;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 0 0 12px
+        rgba(18,118,236,0.08),
+
+        0 0 0 25px
+        rgba(18,118,236,0.04),
+
+        0 20px 50px
+        rgba(0,100,255,0.35);
+
+    transition:
+        transform 0.15s,
+        box-shadow 0.15s;
+
+    -webkit-tap-highlight-color:
+        transparent;
+
+    user-select: none;
+
+}
+
+
+.mic-button:active {
+
+    transform: scale(0.94);
+
+}
+
+
+.mic-icon {
+
+    font-size: 72px;
+
+    line-height: 1;
+
+}
+
+
+/* =====================================================
+   TALKING STATE
+===================================================== */
+
+.mic-button.talking {
+
+    background:
+        linear-gradient(
+            145deg,
+            #ff3d61,
+            #d9153b
+        );
+
+    box-shadow:
+        0 0 0 15px
+        rgba(255,55,85,0.12),
+
+        0 0 0 30px
+        rgba(255,55,85,0.05),
+
+        0 20px 55px
+        rgba(255,30,70,0.38);
+
+    animation:
+        talkingPulse 1s infinite;
+
+}
+
+
+@keyframes talkingPulse {
+
+    0% {
+
+        transform: scale(1);
+
+    }
+
+    50% {
+
+        transform: scale(1.035);
+
+    }
+
+    100% {
+
+        transform: scale(1);
+
+    }
+
+}
+
+
+.mic-text {
+
+    margin-top: 22px;
+
+    color: #d7e4ef;
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+}
+
+
+/* =====================================================
+   CALL SECTION
+===================================================== */
+
+.call-section {
+
+    display: flex;
+
+    justify-content: center;
+
+    margin:
+        0
+        0
+        20px;
+
+}
+
+
+.call-button {
+
+    width: 85%;
+
+    max-width: 330px;
+
+    padding:
+        15px
+        20px;
+
+    border: none;
+
+    border-radius: 16px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #16a866,
+            #0c8050
+        );
+
+    color: white;
+
+    font-size: 16px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 10px 25px
+        rgba(0,150,90,0.22);
+
+    transition: 0.2s;
+
+}
+
+
+.call-button:active {
+
+    transform: scale(0.96);
+
+}
+
+
+/* =====================================================
+   CHANNEL ACTIONS
+===================================================== */
+
+.channel-actions {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 10px;
+
+    margin-bottom: 22px;
+
+}
+
+
+.action-button {
+
+    border: none;
+
+    padding:
+        15px
+        8px;
+
+    border-radius: 16px;
+
+    color: white;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+
+}
+
+
+.action-button:active {
+
+    transform: scale(0.96);
+
+}
+
+
+.action-button.create {
+
+    background:
+        linear-gradient(
+            135deg,
+            #7b43ff,
+            #5520c9
+        );
+
+}
+
+
+.action-button.show {
+
+    background:
+        linear-gradient(
+            135deg,
+            #008fd5,
+            #0063ad
+        );
+
+}
+
+
+/* =====================================================
+   CHANNELS SECTION
+===================================================== */
+
+.channels-section {
+
+    padding:
+        18px;
+
+    border-radius: 20px;
+
+    background:
+        rgba(255,255,255,0.05);
+
+    border:
+        1px solid
+        rgba(255,255,255,0.07);
+
+}
+
+
+.channels-section h3 {
+
+    font-size: 17px;
+
+    margin-bottom: 14px;
+
+    color: #edf6ff;
+
+}
+
+
+.channels-box {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 9px;
+
+}
+
+
+.channels-box p {
+
+    text-align: center;
+
+    color: #8098ad;
+
+    font-size: 14px;
+
+    padding: 15px;
+
+}
+
+
+/* =====================================================
+   CHANNEL ITEM
+===================================================== */
+
+.channel-item {
+
+    width: 100%;
+
+    border: none;
+
+    border-radius: 14px;
+
+    padding:
+        14px
+        15px;
+
+    background:
+        rgba(12,105,200,0.16);
+
+    border:
+        1px solid
+        rgba(40,140,230,0.12);
+
+    color: #e9f4ff;
+
+    text-align: right;
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+
+}
+
+
+.channel-item:hover {
+
+    background:
+        rgba(20,125,230,0.27);
+
+}
+
+
+.channel-item:active {
+
+    transform: scale(0.98);
+
+}
+
+
+/* =====================================================
+   REMOTE AUDIO
+===================================================== */
+
+#remoteAudio {
+
+    display: none;
+
+}
+
+
+/* =====================================================
+   FOOTER
+===================================================== */
+
+footer {
+
+    text-align: center;
+
+    padding:
+        28px
+        5px
+        10px;
+
+    color: #657e94;
+
+    font-size: 11px;
+
+    line-height: 1.8;
+
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 380px) {
+
+    .app {
+
+        padding-left: 10px;
+
+        padding-right: 10px;
+
+    }
+
+
+    .logo-area h1 {
+
+        font-size: 19px;
+
+    }
+
+
+    .mic-button {
+
+        width: 165px;
+
+        height: 165px;
+
+    }
+
+
+    .mic-icon {
+
+        font-size: 62px;
+
+    }
+
+
+    .channel-actions {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+}
+
+
+/* =====================================================
+   LARGE SCREEN
+===================================================== */
+
+@media (min-width: 700px) {
+
+    body {
+
+        padding-top: 25px;
+
+        padding-bottom: 25px;
+
+    }
+
+
+    .app {
+
+        min-height: auto;
+
+        border-radius: 30px;
+
+        background:
+            rgba(4,15,28,0.35);
+
+        box-shadow:
+            0 25px 80px
+            rgba(0,0,0,0.25);
+
+    }
+
+}

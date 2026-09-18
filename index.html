@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ps" dir="rtl">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Walkie Talkie
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="style.css">
+
+</head>
+
+
+<body>
+
+
+    <!-- =========================
+         MAIN APP
+    ========================== -->
+
+    <div class="app">
+
+
+        <!-- =========================
+             HEADER
+        ========================== -->
+
+        <header class="top-header">
+
+            <div class="logo-area">
+
+                <div class="logo">
+                    🎙️
+                </div>
+
+                <div>
+
+                    <h1>
+                        Walkie Talkie
+                    </h1>
+
+                    <p>
+                        Push To Talk
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <button
+                id="languageButton"
+                class="language-button">
+
+                🌐
+
+            </button>
+
+        </header>
+
+
+
+        <!-- =========================
+             ONLINE STATUS
+        ========================== -->
+
+        <div class="status-box">
+
+            <span class="online-dot"></span>
+
+            <span>
+                Online
+            </span>
+
+            <span id="userCount">
+
+                👥 0 Users
+
+            </span>
+
+        </div>
+
+
+
+        <!-- =========================
+             CURRENT CHANNEL
+        ========================== -->
+
+        <section class="channel-box">
+
+            <p class="small-title">
+
+                📻 Current Channel
+
+            </p>
+
+            <h2 id="channelName">
+
+                Afghanistan-1
+
+            </h2>
+
+        </section>
+
+
+
+        <!-- =========================
+             VOICE AREA
+        ========================== -->
+
+        <main class="voice-area">
+
+
+            <p class="talk-info">
+
+                د خبرو لپاره مایکروفون ونیسه
+
+            </p>
+
+
+            <!-- MICROPHONE -->
+
+            <button
+                id="micButton"
+                class="mic-button">
+
+                <span class="mic-icon">
+
+                    🎙️
+
+                </span>
+
+            </button>
+
+
+            <p
+                id="micText"
+                class="mic-text">
+
+                🎙️ د خبرو لپاره ونیسه
+
+            </p>
+
+
+        </main>
+
+
+
+        <!-- =========================
+             VOICE CALL
+        ========================== -->
+
+        <section class="call-section">
+
+            <button
+                id="callButton"
+                class="call-button">
+
+                📞 Voice Call
+
+            </button>
+
+        </section>
+
+
+
+        <!-- =========================
+             CHANNEL BUTTONS
+        ========================== -->
+
+        <section class="channel-actions">
+
+
+            <button
+                id="createChannelButton"
+                class="action-button create">
+
+                ➕
+                نوی چینل
+
+            </button>
+
+
+            <button
+                id="showChannelsButton"
+                class="action-button show">
+
+                📻
+                موجود چینلونه
+
+            </button>
+
+
+        </section>
+
+
+
+        <!-- =========================
+             CHANNEL LIST
+        ========================== -->
+
+        <section class="channels-section">
+
+            <h3>
+
+                📻 موجود چینلونه
+
+            </h3>
+
+
+            <div
+                id="channelsBox"
+                class="channels-box">
+
+                <p>
+                    چینلونه لوډ کېږي...
+                </p>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =========================
+             REMOTE AUDIO
+        ========================== -->
+
+        <audio
+            id="remoteAudio"
+            autoplay
+            playsinline>
+        </audio>
+
+
+
+        <!-- =========================
+             FOOTER
+        ========================== -->
+
+        <footer>
+
+            <p>
+                © 2026 Walkie Talkie
+            </p>
+
+            <p>
+                Live Voice Communication
+            </p>
+
+        </footer>
+
+
+    </div>
+
+
+
+    <!-- =========================
+         JAVASCRIPT
+    ========================== -->
+
+    <script
+        type="module"
+        src="app.js">
+    </script>
+
+
+</body>
+
+</html>
