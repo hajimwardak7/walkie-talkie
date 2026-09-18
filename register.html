@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ps" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>ثبت نام - Walkie Talkie</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css">
+</head>
+
+<body>
+
+<div class="app">
+
+    <div class="auth-box">
+
+        <div class="auth-logo">
+            🎙️
+        </div>
+
+        <h1>
+            نوی حساب جوړ کړئ
+        </h1>
+
+        <p class="auth-subtitle">
+            Walkie Talkie ته ثبت نام وکړئ
+        </p>
+
+
+        <!-- نوم -->
+
+        <input
+            type="text"
+            id="name"
+            placeholder="ستاسو بشپړ نوم"
+            autocomplete="name">
+
+
+        <!-- Email -->
+
+        <input
+            type="email"
+            id="email"
+            placeholder="Email"
+            autocomplete="email">
+
+
+        <!-- Password -->
+
+        <input
+            type="password"
+            id="password"
+            placeholder="پاسورډ"
+            autocomplete="new-password">
+
+
+        <!-- Confirm Password -->
+
+        <input
+            type="password"
+            id="confirmPassword"
+            placeholder="پاسورډ بیا ولیکئ"
+            autocomplete="new-password">
+
+
+        <!-- Register Button -->
+
+        <button
+            id="registerButton"
+            class="auth-button">
+
+            📝 حساب جوړول
+
+        </button>
+
+
+        <!-- Message -->
+
+        <p
+            id="authMessage"
+            class="auth-message">
+        </p>
+
+
+        <!-- Login -->
+
+        <div class="auth-link">
+
+            حساب لرئ؟
+
+            <a href="login.html">
+                Login
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <footer>
+
+        <p>
+            © 2026 Walkie Talkie
+        </p>
+
+        <p>
+            Live Voice Communication
+        </p>
+
+    </footer>
+
+</div>
+
+
+<script type="module">
+
+import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    updateProfile
+}
+from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+
+
+import {
+    doc,
+    setDoc,
+    serverTimestamp
+}
+from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+
+import {
+    app,
+    db
+}
+from "./firebase.js";
+
+
+const auth = getAuth(app);
+
+
+const nameInput =
+    document.getElementById("name");
+
+const emailInput =
+    document.getElementById("email");
+
+const passwordInput =
+    document.getElementById("password");
+
+const confirmPasswordInput =
+    document.getElementById("confirmPassword");
+
+const registerButton =
+    document.getElementById("registerButton");
+
+const authMessage =
+    document.getElementById("authMessage");
+
+
+registerButton.addEventListener(
+    "click",
+    async function () {
+
+        const name =
+            nameInput.value.trim();
+
+        const email =
+            emailInput.value.trim();
+
+        const password =
+            passwordInput.value;
+
+        const confirmPassword =
+            confirmPasswordInput.value;
+
+
+        // نوم
+
+        if (!name) {
+
+            authMessage.innerText =
+                "⚠️ مهرباني وکړئ خپل نوم ولیکئ.";
+
+            return;
+        }
+
+
+        // Email
+
+        if (!email) {
+
+            authMessage.innerText =
+                "⚠️ مهرباني وکړئ Email ولیکئ.";
+
+            return;
+        }
+
+
+        // Password
+
+        if (!password) {
+
+            authMessage.innerText =
+                "⚠️ مهرباني وکړئ پاسورډ ولیکئ.";
+
+            return;
+        }
+
+
+        // Password length
+
+        if (password.length < 6) {
+
+            authMessage.innerText =
+                "⚠️ پاسورډ باید لږ تر لږه ۶ توري ولري.";
+
+            return;
+        }
+
+
+        // Confirm password
+
+        if (password !== confirmPassword) {
+
+            authMessage.innerText =
+                "⚠️ دواړه پاسورډونه یو شان نه دي.";
+
+            return;
+        }
+
+
+        registerButton.disabled = true;
+
+        registerButton.innerText =
+            "⏳ حساب جوړېږي...";
+
+        authMessage.innerText = "";
+
+
+        try {
+
+            // Firebase Authentication
+
+            const userCredential =
+                await createUserWithEmailAndPassword(
+                    auth,
+                    email,
+                    password
+                );
+
+
+            const user =
+                userCredential.user;
+
+
+            // Firebase Profile Name
+
+            await updateProfile(
+                user,
+                {
+                    displayName: name
+                }
+            );
+
+
+            // Firestore User Profile
+
+            await setDoc(
+                doc(
+                    db,
+                    "users",
+                    user.uid
+                ),
+                {
+
+                    uid: user.uid,
+
+                    name: name,
+
+                    email: email,
+
+                    createdAt:
+                        serverTimestamp(),
+
+                    online: true
+
+                }
+            );
+
+
+            authMessage.innerText =
+                "✅ حساب په بریالیتوب جوړ شو!";
+
+
+            // Dashboard ته تلل
+
+            setTimeout(
+                function () {
+
+                    window.location.href =
+                        "index.html";
+
+                },
+                1000
+            );
+
+
+        } catch (error) {
+
+            console.error(error);
+
+
+            let message =
+                "❌ حساب جوړ نشو.";
+
+
+            if (
+                error.code ===
+                "auth/email-already-in-use"
+            ) {
+
+                message =
+                    "⚠️ دا Email مخکې ثبت شوی دی.";
+
+            }
+
+            else if (
+                error.code ===
+                "auth/invalid-email"
+            ) {
+
+                message =
+                    "⚠️ Email ناسم دی.";
+
+            }
+
+            else if (
+                error.code ===
+                "auth/weak-password"
+            ) {
+
+                message =
+                    "⚠️ پاسورډ ډېر کمزوری دی.";
+
+            }
+
+            else if (
+                error.code ===
+                "auth/network-request-failed"
+            ) {
+
+                message =
+                    "⚠️ د انټرنېټ ستونزه ده.";
+
+            }
+
+            else {
+
+                message =
+                    "❌ " + error.message;
+
+            }
+
+
+            authMessage.innerText =
+                message;
+
+
+            registerButton.disabled =
+                false;
+
+            registerButton.innerText =
+                "📝 حساب جوړول";
+
+        }
+
+    }
+);
+
+</script>
+
+</body>
+
+</html>

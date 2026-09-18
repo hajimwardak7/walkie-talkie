@@ -9,6 +9,10 @@
         name="viewport"
         content="width=device-width, initial-scale=1.0">
 
+    <meta
+        name="theme-color"
+        content="#07111f">
+
     <title>
         Walkie Talkie
     </title>
@@ -23,255 +27,826 @@
 <body>
 
 
-    <!-- =========================
-         MAIN APP
-    ========================== -->
-
-    <div class="app">
+<div class="app">
 
 
-        <!-- =========================
-             HEADER
-        ========================== -->
+    <!-- =================================================
+         TOP HEADER
+    ================================================== -->
 
-        <header class="top-header">
+    <header class="top-header">
 
-            <div class="logo-area">
 
-                <div class="logo">
-                    🎙️
+        <div class="brand">
+
+
+            <div class="brand-logo">
+
+                🎙️
+
+            </div>
+
+
+            <div class="brand-text">
+
+                <h1>
+                    Walkie Talkie
+                </h1>
+
+                <span>
+                    Push To Talk
+                </span>
+
+            </div>
+
+
+        </div>
+
+
+        <button
+            id="languageButton"
+            class="icon-button"
+            type="button">
+
+            🌐
+
+        </button>
+
+
+    </header>
+
+
+
+    <!-- =================================================
+         USER PROFILE BAR
+    ================================================== -->
+
+    <section class="user-card">
+
+
+        <div class="user-left">
+
+
+            <div class="user-avatar">
+
+                👤
+
+            </div>
+
+
+            <div class="user-info">
+
+
+                <div
+                    id="welcomeUser"
+                    class="user-name">
+
+                    👋 کارونکی
+
                 </div>
 
-                <div>
 
-                    <h1>
-                        Walkie Talkie
-                    </h1>
+                <div
+                    id="userEmail"
+                    class="user-email">
 
-                    <p>
-                        Push To Talk
-                    </p>
+                    📧 Email
 
                 </div>
+
+
+            </div>
+
+
+        </div>
+
+
+        <div class="user-right">
+
+
+            <div class="online-status">
+
+                <span class="online-dot"></span>
+
+                <span>
+                    Online
+                </span>
 
             </div>
 
 
             <button
-                id="languageButton"
-                class="language-button">
+                id="logoutButton"
+                class="logout-button"
+                type="button">
 
-                🌐
+                🚪
 
             </button>
 
-        </header>
+
+        </div>
+
+
+    </section>
 
 
 
-        <!-- =========================
-             ONLINE STATUS
-        ========================== -->
+    <!-- =================================================
+         ONLINE USERS
+    ================================================== -->
 
-        <div class="status-box">
+    <section class="online-card">
 
-            <span class="online-dot"></span>
 
-            <span>
-                Online
+        <div class="online-main">
+
+
+            <div class="live-icon">
+
+                ●
+
+            </div>
+
+
+            <div>
+
+                <strong>
+                    Live Connection
+                </strong>
+
+                <p>
+                    شبکه فعاله
+                </p>
+
+            </div>
+
+
+        </div>
+
+
+        <div
+            id="userCount"
+            class="user-count">
+
+            👥 0
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- =================================================
+         CURRENT CHANNEL
+    ================================================== -->
+
+    <section class="channel-card">
+
+
+        <div class="channel-top">
+
+
+            <div class="channel-label">
+
+                <span class="radio-icon">
+                    📻
+                </span>
+
+                <span>
+                    Current Channel
+                </span>
+
+            </div>
+
+
+            <span class="channel-live">
+                LIVE
             </span>
 
-            <span id="userCount">
 
-                👥 0 Users
+        </div>
 
+
+        <h2 id="channelName">
+            Afghanistan-1
+        </h2>
+
+
+        <p>
+            د خبرو لپاره په مایکروفون ګوته ونیسئ
+        </p>
+
+
+    </section>
+
+
+
+    <!-- =================================================
+         VOICE / PUSH TO TALK
+    ================================================== -->
+
+    <main class="voice-area">
+
+
+        <div class="voice-title">
+
+            <span>
+                🎙️
+            </span>
+
+            <span>
+                Push To Talk
             </span>
 
         </div>
 
 
+        <p class="talk-info">
 
-        <!-- =========================
-             CURRENT CHANNEL
-        ========================== -->
+            د خبرو لپاره مایکروفون ونیسئ
 
-        <section class="channel-box">
-
-            <p class="small-title">
-
-                📻 Current Channel
-
-            </p>
-
-            <h2 id="channelName">
-
-                Afghanistan-1
-
-            </h2>
-
-        </section>
+        </p>
 
 
+        <!-- MICROPHONE -->
 
-        <!-- =========================
-             VOICE AREA
-        ========================== -->
-
-        <main class="voice-area">
-
-
-            <p class="talk-info">
-
-                د خبرو لپاره مایکروفون ونیسه
-
-            </p>
+        <button
+            id="micButton"
+            class="mic-button"
+            type="button"
+            aria-label="Push To Talk">
 
 
-            <!-- MICROPHONE -->
+            <span class="mic-ring ring-one"></span>
 
-            <button
-                id="micButton"
-                class="mic-button">
+            <span class="mic-ring ring-two"></span>
+
+
+            <span class="mic-inner">
+
 
                 <span class="mic-icon">
-
                     🎙️
-
                 </span>
 
-            </button>
+
+            </span>
 
 
-            <p
-                id="micText"
-                class="mic-text">
-
-                🎙️ د خبرو لپاره ونیسه
-
-            </p>
+        </button>
 
 
-        </main>
+        <div
+            id="micText"
+            class="mic-text">
+
+            🎙️ د خبرو لپاره ونیسه
+
+        </div>
 
 
+        <div class="hold-hint">
 
-        <!-- =========================
-             VOICE CALL
-        ========================== -->
+            <span>
+                ●
+            </span>
 
-        <section class="call-section">
+            Hold to speak
 
-            <button
-                id="callButton"
-                class="call-button">
+        </div>
 
-                📞 Voice Call
 
-            </button>
-
-        </section>
+    </main>
 
 
 
-        <!-- =========================
-             CHANNEL BUTTONS
-        ========================== -->
+    <!-- =================================================
+         VOICE CALL
+    ================================================== -->
 
-        <section class="channel-actions">
-
-
-            <button
-                id="createChannelButton"
-                class="action-button create">
-
-                ➕
-                نوی چینل
-
-            </button>
+    <section class="call-section">
 
 
-            <button
-                id="showChannelsButton"
-                class="action-button show">
+        <button
+            id="callButton"
+            class="call-button"
+            type="button">
 
+
+            <span class="call-icon">
+                📞
+            </span>
+
+
+            <span class="call-text">
+
+
+                <strong>
+                    Voice Call
+                </strong>
+
+
+                <small>
+                    مستقیم غږیز تماس
+                </small>
+
+
+            </span>
+
+
+            <span class="call-arrow">
+                ‹
+            </span>
+
+
+        </button>
+
+
+    </section>
+
+
+
+    <!-- =================================================
+         CHANNEL ACTIONS
+    ================================================== -->
+
+    <section class="channel-actions">
+
+
+        <button
+            id="createChannelButton"
+            class="action-card create"
+            type="button">
+
+
+            <span class="action-icon">
+                ＋
+            </span>
+
+
+            <span class="action-content">
+
+
+                <strong>
+                    نوی چینل
+                </strong>
+
+
+                <small>
+                    Create Channel
+                </small>
+
+
+            </span>
+
+
+        </button>
+
+
+
+        <button
+            id="showChannelsButton"
+            class="action-card channels"
+            type="button">
+
+
+            <span class="action-icon">
                 📻
-                موجود چینلونه
-
-            </button>
+            </span>
 
 
-        </section>
+            <span class="action-content">
+
+
+                <strong>
+                    چینلونه
+                </strong>
+
+
+                <small>
+                    Available Channels
+                </small>
+
+
+            </span>
+
+
+        </button>
+
+
+    </section>
 
 
 
-        <!-- =========================
-             CHANNEL LIST
-        ========================== -->
+    <!-- =================================================
+         CHANNEL LIST
+    ================================================== -->
 
-        <section class="channels-section">
-
-            <h3>
-
-                📻 موجود چینلونه
-
-            </h3>
+    <section class="channels-section">
 
 
-            <div
-                id="channelsBox"
-                class="channels-box">
+        <div class="section-heading">
+
+
+            <div>
+
+
+                <h3>
+                    📻 موجود چینلونه
+                </h3>
+
 
                 <p>
-                    چینلونه لوډ کېږي...
+                    خپل چینل انتخاب کړئ
                 </p>
+
 
             </div>
 
-        </section>
+
+            <span class="channel-count">
+                LIVE
+            </span>
+
+
+        </div>
+
+
+        <div
+            id="channelsBox"
+            class="channels-box">
+
+
+            <div class="loading-box">
+
+                <span class="loading-spinner"></span>
+
+                چینلونه لوډ کېږي...
+
+            </div>
+
+
+        </div>
+
+
+    </section>
 
 
 
-        <!-- =========================
-             REMOTE AUDIO
-        ========================== -->
+    <!-- =================================================
+         APP INFO
+    ================================================== -->
 
-        <audio
-            id="remoteAudio"
-            autoplay
-            playsinline>
-        </audio>
+    <section class="app-info">
 
 
-
-        <!-- =========================
-             FOOTER
-        ========================== -->
-
-        <footer>
-
-            <p>
-                © 2026 Walkie Talkie
-            </p>
-
-            <p>
-                Live Voice Communication
-            </p>
-
-        </footer>
+        <div class="info-item">
 
 
-    </div>
+            <span class="info-icon">
+                🔒
+            </span>
+
+
+            <div>
+
+                <strong>
+                    Secure
+                </strong>
+
+                <small>
+                    خوندي اړیکه
+                </small>
+
+            </div>
+
+
+        </div>
 
 
 
-    <!-- =========================
-         JAVASCRIPT
-    ========================== -->
+        <div class="info-item">
 
-    <script
-        type="module"
-        src="app.js">
-    </script>
+
+            <span class="info-icon">
+                ⚡
+            </span>
+
+
+            <div>
+
+                <strong>
+                    Live
+                </strong>
+
+                <small>
+                    چټکه اړیکه
+                </small>
+
+            </div>
+
+
+        </div>
+
+
+
+        <div class="info-item">
+
+
+            <span class="info-icon">
+                🌍
+            </span>
+
+
+            <div>
+
+                <strong>
+                    Global
+                </strong>
+
+                <small>
+                    هر ځای
+                </small>
+
+            </div>
+
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- =================================================
+         REMOTE AUDIO
+    ================================================== -->
+
+    <audio
+        id="remoteAudio"
+        autoplay
+        playsinline>
+    </audio>
+
+
+
+    <!-- =================================================
+         FOOTER
+    ================================================== -->
+
+    <footer>
+
+
+        <div class="footer-logo">
+
+            🎙️ Walkie Talkie
+
+        </div>
+
+
+        <p>
+            Live Voice Communication
+        </p>
+
+
+        <small>
+            © 2026 Walkie Talkie
+        </small>
+
+
+    </footer>
+
+
+</div>
+
+
+
+<!-- =====================================================
+     AUTH + APP
+====================================================== -->
+
+<script type="module">
+
+    import {
+        getAuth,
+        onAuthStateChanged,
+        signOut
+    }
+    from
+    "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+
+
+    import {
+        doc,
+        getDoc
+    }
+    from
+    "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+
+    import {
+        app,
+        db
+    }
+    from "./firebase.js";
+
+
+    const auth =
+        getAuth(app);
+
+
+
+    /* =================================================
+       LOGIN CHECK
+    ================================================= */
+
+
+    onAuthStateChanged(
+        auth,
+        async function(user) {
+
+
+            if (!user) {
+
+                window.location.href =
+                    "login.html";
+
+                return;
+
+            }
+
+
+
+            const welcomeUser =
+                document.getElementById(
+                    "welcomeUser"
+                );
+
+
+            const userEmail =
+                document.getElementById(
+                    "userEmail"
+                );
+
+
+
+            if (userEmail) {
+
+                userEmail.innerText =
+                    "📧 " + user.email;
+
+            }
+
+
+
+            if (welcomeUser) {
+
+                welcomeUser.innerText =
+                    "👋 سلام " +
+                    (
+                        user.displayName ||
+                        "کارونکي"
+                    );
+
+            }
+
+
+
+            /* =========================================
+               GET PROFILE FROM FIRESTORE
+            ========================================== */
+
+
+            try {
+
+
+                const userRef =
+                    doc(
+                        db,
+                        "users",
+                        user.uid
+                    );
+
+
+                const userSnap =
+                    await getDoc(
+                        userRef
+                    );
+
+
+                if (
+                    userSnap.exists()
+                ) {
+
+
+                    const data =
+                        userSnap.data();
+
+
+                    if (
+                        welcomeUser &&
+                        data.name
+                    ) {
+
+                        welcomeUser.innerText =
+                            "👋 سلام " +
+                            data.name;
+
+                    }
+
+                }
+
+
+            }
+            catch (error) {
+
+                console.error(
+                    "Profile Error:",
+                    error
+                );
+
+            }
+
+
+        }
+    );
+
+
+
+    /* =================================================
+       LOGOUT
+    ================================================= */
+
+
+    const logoutButton =
+        document.getElementById(
+            "logoutButton"
+        );
+
+
+    if (logoutButton) {
+
+
+        logoutButton.addEventListener(
+            "click",
+            async function() {
+
+
+                try {
+
+
+                    logoutButton.disabled =
+                        true;
+
+
+                    await signOut(
+                        auth
+                    );
+
+
+                    window.location.href =
+                        "login.html";
+
+
+                }
+                catch (error) {
+
+
+                    console.error(
+                        error
+                    );
+
+
+                    logoutButton.disabled =
+                        false;
+
+
+                    alert(
+                        "Logout ونه شو."
+                    );
+
+                }
+
+
+            }
+        );
+
+    }
+
+</script>
+
+
+
+<!-- =====================================================
+     MAIN APP JAVASCRIPT
+====================================================== -->
+
+<script
+    type="module"
+    src="app.js">
+</script>
 
 
 </body>

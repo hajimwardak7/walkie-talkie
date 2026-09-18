@@ -1,6 +1,19 @@
+/* =====================================================
+   WALKIE TALKIE - MAIN APP
+===================================================== */
+
+
 import {
+    app,
     db
 } from "./firebase.js";
+
+
+import {
+    getAuth,
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+
 
 import {
     collection,
@@ -10,8 +23,24 @@ import {
     deleteDoc,
     onSnapshot,
     updateDoc,
-    addDoc
+    addDoc,
+    query,
+    where,
+    serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+
+/* =====================================================
+   AUTH
+===================================================== */
+
+const auth =
+    getAuth(app);
+
+
+let firebaseUser = null;
+
+let appStarted = false;
 
 
 /* =====================================================
@@ -53,22 +82,7 @@ const languageButton =
    USER
 ===================================================== */
 
-let userId =
-    localStorage.getItem("walkieUserId");
-
-if (!userId) {
-
-    userId =
-        "user-" +
-        Math.random()
-            .toString(36)
-            .substring(2, 10);
-
-    localStorage.setItem(
-        "walkieUserId",
-        userId
-    );
-}
+let userId = null;
 
 
 /* =====================================================
@@ -80,9 +94,12 @@ let currentChannel =
         "currentWalkieChannel"
     ) || "Afghanistan-1";
 
+
 if (channelName) {
+
     channelName.innerText =
         currentChannel;
+
 }
 
 
@@ -100,6 +117,8 @@ let stopIncomingCalls = null;
 
 let stopCallListener = null;
 
+let stopRemoteCandidates = null;
+
 let peerConnection = null;
 
 let localStream = null;
@@ -111,6 +130,8 @@ let currentRole = null;
 let remoteCandidateQueue = [];
 
 let isMicPressed = false;
+
+let activeCallIds = new Set();
 
 
 /* =====================================================
@@ -150,10 +171,11 @@ async function getMicrophone() {
         ) {
 
             alert(
-                "ستاسې براوزر د مایکروفون ملاتړ نه کوي."
+                "🎙️ ستاسې براوزر د مایکروفون ملاتړ نه کوي."
             );
 
             return null;
+
         }
 
 
@@ -182,17 +204,15 @@ async function getMicrophone() {
         );
 
 
-        /*
-         د پیل پر وخت مایک بند ساتو
-        */
-
         const tracks =
             localStream.getAudioTracks();
+
 
         tracks.forEach(
             function(track) {
 
-                track.enabled = false;
+                track.enabled =
+                    false;
 
             }
         );
@@ -208,12 +228,29 @@ async function getMicrophone() {
             error
         );
 
-        alert(
-            "🎙️ د مایکروفون اجازه ورکړئ."
-        );
+
+        if (
+            error.name ===
+            "NotAllowedError"
+        ) {
+
+            alert(
+                "🎙️ مهرباني وکړئ د مایکروفون اجازه ورکړئ."
+            );
+
+        } else {
+
+            alert(
+                "🎙️ مایکروفون فعال نه شو."
+            );
+
+        }
+
 
         return null;
+
     }
+
 }
 
 
@@ -233,7 +270,8 @@ async function createPeerConnection(
     }
 
 
-    currentRole = role;
+    currentRole =
+        role;
 
 
     peerConnection =
@@ -242,9 +280,9 @@ async function createPeerConnection(
         );
 
 
-    /*
-       Microphone
-    */
+    /* -----------------------------------------------
+       MICROPHONE
+    ------------------------------------------------ */
 
     if (!localStream) {
 
@@ -272,9 +310,9 @@ async function createPeerConnection(
     }
 
 
-    /*
-       Remote Audio
-    */
+    /* -----------------------------------------------
+       REMOTE AUDIO
+    ------------------------------------------------ */
 
     peerConnection.ontrack =
         function(event) {
@@ -294,7 +332,12 @@ async function createPeerConnection(
                     event.streams[0];
 
 
-                remoteAudio.muted = false;
+                remoteAudio.muted =
+                    false;
+
+
+                remoteAudio.volume =
+                    1;
 
 
                 remoteAudio
@@ -303,7 +346,7 @@ async function createPeerConnection(
                         function(error) {
 
                             console.log(
-                                "Audio play waiting:",
+                                "Audio waiting:",
                                 error
                             );
 
@@ -315,9 +358,9 @@ async function createPeerConnection(
         };
 
 
-    /*
-       ICE Candidates
-    */
+    /* -----------------------------------------------
+       ICE CANDIDATES
+    ------------------------------------------------ */
 
     peerConnection.onicecandidate =
         async function(event) {
@@ -352,11 +395,6 @@ async function createPeerConnection(
                 );
 
 
-                console.log(
-                    "🧊 ICE candidate saved"
-                );
-
-
             } catch (error) {
 
                 console.error(
@@ -369,9 +407,9 @@ async function createPeerConnection(
         };
 
 
-    /*
-       Connection State
-    */
+    /* -----------------------------------------------
+       CONNECTION STATE
+    ------------------------------------------------ */
 
     peerConnection
         .onconnectionstatechange =
@@ -385,7 +423,8 @@ async function createPeerConnection(
 
 
             const state =
-                peerConnection.connectionState;
+                peerConnection
+                    .connectionState;
 
 
             console.log(
@@ -394,7 +433,9 @@ async function createPeerConnection(
             );
 
 
-            if (state === "connected") {
+            if (
+                state === "connected"
+            ) {
 
                 console.log(
                     "🟢 VOICE CONNECTED"
@@ -412,16 +453,71 @@ async function createPeerConnection(
 
 
             if (
-                state === "disconnected" ||
-                state === "failed" ||
-                state === "closed"
+                state === "connecting"
+            ) {
+
+                if (micText) {
+
+                    micText.innerText =
+                        "🔄 اړیکه جوړېږي...";
+
+                }
+
+            }
+
+
+            if (
+                state === "failed"
             ) {
 
                 console.log(
-                    "🔴 Voice disconnected"
+                    "🔴 WebRTC failed"
+                );
+
+
+                if (micText) {
+
+                    micText.innerText =
+                        "🔴 اړیکه ناکامه شوه";
+
+                }
+
+            }
+
+
+            if (
+                state === "disconnected"
+            ) {
+
+                console.log(
+                    "🟠 WebRTC disconnected"
                 );
 
             }
+
+        };
+
+
+    /* -----------------------------------------------
+       ICE CONNECTION STATE
+    ------------------------------------------------ */
+
+    peerConnection
+        .oniceconnectionstatechange =
+        function() {
+
+            if (!peerConnection) {
+
+                return;
+
+            }
+
+
+            console.log(
+                "ICE:",
+                peerConnection
+                    .iceConnectionState
+            );
 
         };
 
@@ -440,6 +536,20 @@ function watchRemoteCandidates(
     role
 ) {
 
+    /* -----------------------------------------------
+       پخوانی listener بندول
+    ------------------------------------------------ */
+
+    if (stopRemoteCandidates) {
+
+        stopRemoteCandidates();
+
+        stopRemoteCandidates =
+            null;
+
+    }
+
+
     const remoteRole =
         role === "caller"
             ? "answererCandidates"
@@ -453,88 +563,89 @@ function watchRemoteCandidates(
         );
 
 
-    onSnapshot(
+    stopRemoteCandidates =
+        onSnapshot(
 
-        candidatesRef,
+            candidatesRef,
 
-        async function(snapshot) {
+            async function(snapshot) {
 
-            if (!peerConnection) {
+                if (!peerConnection) {
 
-                return;
-
-            }
-
-
-            for (
-                const change of
-                snapshot.docChanges()
-            ) {
-
-                if (
-                    change.type !== "added"
-                ) {
-
-                    continue;
+                    return;
 
                 }
 
 
-                try {
-
-                    const data =
-                        change.doc.data();
-
-
-                    const candidate =
-                        new RTCIceCandidate(
-                            data
-                        );
-
-
-                    /*
-                       که Remote Description لا نه وي،
-                       candidate په queue کې ساتو.
-                    */
+                for (
+                    const change of
+                    snapshot.docChanges()
+                ) {
 
                     if (
-                        !peerConnection
-                            .remoteDescription
+                        change.type !==
+                        "added"
                     ) {
-
-                        remoteCandidateQueue
-                            .push(candidate);
 
                         continue;
 
                     }
 
 
-                    await peerConnection
-                        .addIceCandidate(
-                            candidate
+                    try {
+
+                        const data =
+                            change.doc.data();
+
+
+                        const candidate =
+                            new RTCIceCandidate(
+                                data
+                            );
+
+
+                        if (
+                            !peerConnection
+                                .remoteDescription
+                        ) {
+
+                            remoteCandidateQueue
+                                .push(candidate);
+
+                            continue;
+
+                        }
+
+
+                        await peerConnection
+                            .addIceCandidate(
+                                candidate
+                            );
+
+
+                    } catch (error) {
+
+                        console.error(
+                            "Remote ICE error:",
+                            error
                         );
 
-
-                    console.log(
-                        "🧊 Remote ICE added"
-                    );
-
-
-                } catch (error) {
-
-                    console.error(
-                        "Remote ICE error:",
-                        error
-                    );
+                    }
 
                 }
 
+            },
+
+            function(error) {
+
+                console.error(
+                    "ICE listener error:",
+                    error
+                );
+
             }
 
-        }
-
-    );
+        );
 
 }
 
@@ -553,7 +664,8 @@ async function addQueuedCandidates() {
 
 
     if (
-        !peerConnection.remoteDescription
+        !peerConnection
+            .remoteDescription
     ) {
 
         return;
@@ -585,7 +697,8 @@ async function addQueuedCandidates() {
     }
 
 
-    remoteCandidateQueue = [];
+    remoteCandidateQueue =
+        [];
 
 }
 
@@ -596,17 +709,24 @@ async function addQueuedCandidates() {
 
 async function createCall() {
 
-    try {
+    if (!firebaseUser) {
 
-        /*
-           که پخوانی connection وي،
-           لومړی یې بندوه
-        */
+        alert(
+            "⚠️ لومړی Login وکړئ."
+        );
+
+        return;
+
+    }
+
+
+    try {
 
         closePeerConnection();
 
 
-        remoteCandidateQueue = [];
+        remoteCandidateQueue =
+            [];
 
 
         const callRef =
@@ -629,14 +749,18 @@ async function createCall() {
             );
 
 
-        /*
-           Offer
-        */
+        if (!pc) {
+
+            return;
+
+        }
+
 
         const offer =
             await pc.createOffer({
 
-                offerToReceiveAudio: true
+                offerToReceiveAudio:
+                    true
 
             });
 
@@ -645,10 +769,6 @@ async function createCall() {
             offer
         );
 
-
-        /*
-           Call Firestore ته
-        */
 
         await setDoc(
 
@@ -661,6 +781,11 @@ async function createCall() {
 
                 caller:
                     userId,
+
+                callerName:
+                    firebaseUser
+                        .displayName ||
+                    firebaseUser.email,
 
                 offer: {
 
@@ -676,16 +801,12 @@ async function createCall() {
                     "waiting",
 
                 createdAt:
-                    Date.now()
+                    serverTimestamp()
 
             }
 
         );
 
-
-        /*
-           د بل موبایل Answer څارو
-        */
 
         stopCallListener =
             onSnapshot(
@@ -741,14 +862,34 @@ async function createCall() {
 
                     }
 
+
+                    if (
+                        data.status ===
+                        "answered"
+                    ) {
+
+                        if (micText) {
+
+                            micText.innerText =
+                                "🟢 وصل شو — مایک ونیسه";
+
+                        }
+
+                    }
+
+                },
+
+                function(error) {
+
+                    console.error(
+                        "Call listener error:",
+                        error
+                    );
+
                 }
 
             );
 
-
-        /*
-           ICE سمدستي څارو
-        */
 
         watchRemoteCandidates(
             callRef,
@@ -778,6 +919,9 @@ async function createCall() {
         );
 
 
+        closePeerConnection();
+
+
         alert(
             "❌ Call جوړ نه شو."
         );
@@ -796,6 +940,9 @@ function watchIncomingCalls() {
     if (stopIncomingCalls) {
 
         stopIncomingCalls();
+
+        stopIncomingCalls =
+            null;
 
     }
 
@@ -859,6 +1006,23 @@ function watchIncomingCalls() {
                         }
 
 
+                        if (
+                            activeCallIds
+                                .has(
+                                    callDoc.id
+                                )
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        activeCallIds.add(
+                            callDoc.id
+                        );
+
+
                         showIncomingCall(
                             callDoc.id,
                             data
@@ -893,10 +1057,18 @@ function showIncomingCall(
     data
 ) {
 
+    const callerName =
+        data.callerName ||
+        "نامعلوم";
+
+
     const accepted =
         confirm(
 
             "📞 نوی Voice Call راغلی دی.\n\n" +
+            "👤 " +
+            callerName +
+            "\n\n" +
             "ایا غواړې Call قبول کړې؟"
 
         );
@@ -905,6 +1077,12 @@ function showIncomingCall(
     if (accepted) {
 
         answerCall(
+            callId
+        );
+
+    } else {
+
+        activeCallIds.delete(
             callId
         );
 
@@ -926,7 +1104,8 @@ async function answerCall(
         closePeerConnection();
 
 
-        remoteCandidateQueue = [];
+        remoteCandidateQueue =
+            [];
 
 
         const callRef =
@@ -958,10 +1137,26 @@ async function answerCall(
             callSnapshot.data();
 
 
-        if (!data.offer) {
+        if (
+            !data.offer
+        ) {
 
             alert(
                 "❌ Offer موجود نه دی."
+            );
+
+            return;
+
+        }
+
+
+        if (
+            data.status !==
+            "waiting"
+        ) {
+
+            alert(
+                "⚠️ دا Call لا دمخه قبول شوی."
             );
 
             return;
@@ -976,9 +1171,12 @@ async function answerCall(
             );
 
 
-        /*
-           Offer
-        */
+        if (!pc) {
+
+            return;
+
+        }
+
 
         await pc.setRemoteDescription(
 
@@ -989,21 +1187,14 @@ async function answerCall(
         );
 
 
-        /*
-           مخکې راغلي ICE candidates
-        */
-
         await addQueuedCandidates();
 
-
-        /*
-           Answer
-        */
 
         const answer =
             await pc.createAnswer({
 
-                offerToReceiveAudio: true
+                offerToReceiveAudio:
+                    true
 
             });
 
@@ -1012,10 +1203,6 @@ async function answerCall(
             answer
         );
 
-
-        /*
-           Answer Firebase ته
-        */
 
         await updateDoc(
 
@@ -1036,20 +1223,25 @@ async function answerCall(
                 answerer:
                     userId,
 
+                answererName:
+                    firebaseUser
+                        ? (
+                            firebaseUser
+                                .displayName ||
+                            firebaseUser.email
+                        )
+                        : "User",
+
                 status:
                     "answered",
 
                 answeredAt:
-                    Date.now()
+                    serverTimestamp()
 
             }
 
         );
 
-
-        /*
-           Caller ICE څارو
-        */
 
         watchRemoteCandidates(
             callRef,
@@ -1084,6 +1276,9 @@ async function answerCall(
         );
 
 
+        closePeerConnection();
+
+
         alert(
             "❌ Call قبول نشو."
         );
@@ -1108,12 +1303,9 @@ async function startTalking(
     }
 
 
-    isMicPressed = true;
+    isMicPressed =
+        true;
 
-
-    /*
-       Microphone
-    */
 
     if (!localStream) {
 
@@ -1142,11 +1334,8 @@ async function startTalking(
     }
 
 
-    /*
-       غږ ON
-    */
-
-    track.enabled = true;
+    track.enabled =
+        true;
 
 
     if (micButton) {
@@ -1188,7 +1377,8 @@ function stopTalking(
     }
 
 
-    isMicPressed = false;
+    isMicPressed =
+        false;
 
 
     if (!localStream) {
@@ -1205,7 +1395,8 @@ function stopTalking(
 
     if (track) {
 
-        track.enabled = false;
+        track.enabled =
+            false;
 
     }
 
@@ -1241,66 +1432,52 @@ function stopTalking(
 if (micButton) {
 
 
-    /*
-       Android / Touch
-    */
-
     micButton.addEventListener(
-        "touchstart",
-        startTalking,
-        {
-            passive: false
-        }
-    );
-
-
-    micButton.addEventListener(
-        "touchend",
-        stopTalking,
-        {
-            passive: false
-        }
-    );
-
-
-    micButton.addEventListener(
-        "touchcancel",
-        stopTalking,
-        {
-            passive: false
-        }
-    );
-
-
-    /*
-       Mouse / PC
-    */
-
-    micButton.addEventListener(
-        "mousedown",
+        "pointerdown",
         startTalking
     );
 
 
     micButton.addEventListener(
-        "mouseup",
+        "pointerup",
         stopTalking
     );
 
 
     micButton.addEventListener(
-        "mouseleave",
+        "pointercancel",
         stopTalking
+    );
+
+
+    micButton.addEventListener(
+        "pointerleave",
+        function(event) {
+
+            if (isMicPressed) {
+
+                stopTalking(event);
+
+            }
+
+        }
     );
 
 }
 
 
 /* =====================================================
-   CHANNEL ONLINE USER
+   ONLINE USER
 ===================================================== */
 
 async function joinOnlineUsers() {
+
+    if (!firebaseUser) {
+
+        return;
+
+    }
+
 
     try {
 
@@ -1329,11 +1506,19 @@ async function joinOnlineUsers() {
                 userId:
                     userId,
 
+                name:
+                    firebaseUser
+                        .displayName ||
+                    firebaseUser.email,
+
+                email:
+                    firebaseUser.email,
+
                 online:
                     true,
 
                 joinedAt:
-                    Date.now()
+                    serverTimestamp()
 
             }
 
@@ -1374,7 +1559,10 @@ async function leaveOnlineUsers() {
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "Leave user error:",
+            error
+        );
 
     }
 
@@ -1390,6 +1578,9 @@ function watchOnlineUsers() {
     if (stopUsersListener) {
 
         stopUsersListener();
+
+        stopUsersListener =
+            null;
 
     }
 
@@ -1424,6 +1615,15 @@ function watchOnlineUsers() {
 
                 }
 
+            },
+
+            function(error) {
+
+                console.error(
+                    "Users listener:",
+                    error
+                );
+
             }
 
         );
@@ -1437,9 +1637,20 @@ function watchOnlineUsers() {
 
 async function createChannel() {
 
+    if (!firebaseUser) {
+
+        alert(
+            "⚠️ لومړی Login وکړئ."
+        );
+
+        return;
+
+    }
+
+
     const name =
         prompt(
-            "د نوي چینل نوم ولیکه:"
+            "📻 د نوي چینل نوم ولیکه:"
         );
 
 
@@ -1461,6 +1672,17 @@ async function createChannel() {
     }
 
 
+    if (cleanName.length < 2) {
+
+        alert(
+            "⚠️ د چینل نوم لږ تر لږه ۲ توري ولري."
+        );
+
+        return;
+
+    }
+
+
     try {
 
         const channelRef =
@@ -1475,6 +1697,23 @@ async function createChannel() {
             );
 
 
+        const existing =
+            await getDoc(
+                channelRef
+            );
+
+
+        if (existing.exists()) {
+
+            alert(
+                "⚠️ دا چینل مخکې موجود دی."
+            );
+
+            return;
+
+        }
+
+
         await setDoc(
 
             channelRef,
@@ -1484,8 +1723,16 @@ async function createChannel() {
                 name:
                     cleanName,
 
+                createdBy:
+                    userId,
+
+                createdByName:
+                    firebaseUser
+                        .displayName ||
+                    firebaseUser.email,
+
                 createdAt:
-                    Date.now()
+                    serverTimestamp()
 
             }
 
@@ -1493,7 +1740,7 @@ async function createChannel() {
 
 
         alert(
-            "✅ چینل جوړ شو"
+            "✅ چینل جوړ شو."
         );
 
 
@@ -1502,11 +1749,14 @@ async function createChannel() {
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "Create channel error:",
+            error
+        );
 
 
         alert(
-            "❌ چینل جوړ نشو"
+            "❌ چینل جوړ نشو."
         );
 
     }
@@ -1523,6 +1773,9 @@ function showChannels() {
     if (stopChannelsListener) {
 
         stopChannelsListener();
+
+        stopChannelsListener =
+            null;
 
     }
 
@@ -1555,7 +1808,7 @@ function showChannels() {
                 if (snapshot.empty) {
 
                     channelsBox.innerHTML =
-                        "<p>هیڅ چینل نشته</p>";
+                        "<p>📻 تر اوسه چینل نشته.</p>";
 
                     return;
 
@@ -1580,16 +1833,26 @@ function showChannels() {
                             "channel-item";
 
 
+                        button.type =
+                            "button";
+
+
                         button.innerHTML =
                             "📻 " +
-                            data.name;
+                            (
+                                data.name ||
+                                channelDoc.id
+                            );
 
 
                         button.onclick =
                             function() {
 
                                 joinChannel(
-                                    data.name
+
+                                    data.name ||
+                                    channelDoc.id
+
                                 );
 
                             };
@@ -1602,6 +1865,15 @@ function showChannels() {
 
                     }
 
+                );
+
+            },
+
+            function(error) {
+
+                console.error(
+                    "Channels listener:",
+                    error
                 );
 
             }
@@ -1619,6 +1891,13 @@ async function joinChannel(
     name
 ) {
 
+    if (!firebaseUser) {
+
+        return;
+
+    }
+
+
     if (!name) {
 
         return;
@@ -1627,6 +1906,16 @@ async function joinChannel(
 
 
     await leaveOnlineUsers();
+
+
+    if (stopUsersListener) {
+
+        stopUsersListener();
+
+        stopUsersListener =
+            null;
+
+    }
 
 
     currentChannel =
@@ -1655,14 +1944,21 @@ async function joinChannel(
 
     watchOnlineUsers();
 
+
     watchIncomingCalls();
 
 
-    alert(
+    if (micText) {
 
-        "📻 چینل ته داخل شوې:\n" +
+        micText.innerText =
+            "🎙️ د خبرو لپاره ونیسه";
+
+    }
+
+
+    console.log(
+        "📻 Joined:",
         name
-
     );
 
 }
@@ -1736,7 +2032,7 @@ if (languageButton) {
         function() {
 
             alert(
-                "🌐 د ژبې برخه به وروسته فعاله کړو."
+                "🌐 د ژبې برخه به په راتلونکي درس کې فعاله کړو."
             );
 
         }
@@ -1783,6 +2079,26 @@ function closePeerConnection() {
         [];
 
 
+    if (stopCallListener) {
+
+        stopCallListener();
+
+        stopCallListener =
+            null;
+
+    }
+
+
+    if (stopRemoteCandidates) {
+
+        stopRemoteCandidates();
+
+        stopRemoteCandidates =
+            null;
+
+    }
+
+
     if (remoteAudio) {
 
         remoteAudio.srcObject =
@@ -1791,12 +2107,19 @@ function closePeerConnection() {
     }
 
 
-    if (stopCallListener) {
+    if (micButton) {
 
-        stopCallListener();
+        micButton.classList.remove(
+            "talking"
+        );
 
-        stopCallListener =
-            null;
+    }
+
+
+    if (micText) {
+
+        micText.innerText =
+            "🎙️ د خبرو لپاره ونیسه";
 
     }
 
@@ -1809,8 +2132,41 @@ function closePeerConnection() {
 
 async function startApp() {
 
+    if (appStarted) {
+
+        return;
+
+    }
+
+
+    if (!firebaseUser) {
+
+        return;
+
+    }
+
+
+    appStarted =
+        true;
+
+
+    /*
+       Firebase UID
+       د کارونکي اصلي ID دی
+    */
+
+    userId =
+        firebaseUser.uid;
+
+
     console.log(
         "📻 Walkie Talkie Started"
+    );
+
+
+    console.log(
+        "👤 User:",
+        firebaseUser.email
     );
 
 
@@ -1829,10 +2185,34 @@ async function startApp() {
 
 
 /* =====================================================
-   PAGE START
+   AUTH STATE
 ===================================================== */
 
-startApp();
+onAuthStateChanged(
+
+    auth,
+
+    async function(user) {
+
+        if (!user) {
+
+            window.location.href =
+                "login.html";
+
+            return;
+
+        }
+
+
+        firebaseUser =
+            user;
+
+
+        await startApp();
+
+    }
+
+);
 
 
 /* =====================================================

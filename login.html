@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ps" dir="rtl">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>Login - Walkie Talkie</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css">
+
+</head>
+
+
+<body>
+
+<div class="app">
+
+    <div class="auth-box">
+
+        <div class="auth-logo">
+            🎙️
+        </div>
+
+
+        <h1>
+            Walkie Talkie
+        </h1>
+
+
+        <p class="auth-subtitle">
+            خپل حساب ته Login شه
+        </p>
+
+
+        <input
+            id="email"
+            type="email"
+            placeholder="Email">
+
+
+        <input
+            id="password"
+            type="password"
+            placeholder="Password">
+
+
+        <button
+            id="loginButton"
+            class="auth-button">
+
+            🔐 Login
+
+        </button>
+
+
+        <p
+            id="message"
+            class="auth-message">
+        </p>
+
+
+        <p class="auth-link">
+
+            حساب نه لرې؟
+
+            <a href="register.html">
+                نوی حساب جوړ کړه
+            </a>
+
+        </p>
+
+    </div>
+
+</div>
+
+
+<script type="module">
+
+import {
+    getAuth,
+    signInWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+
+
+import {
+    app
+} from "./firebase.js";
+
+
+const auth =
+    getAuth(app);
+
+
+const emailInput =
+    document.getElementById(
+        "email"
+    );
+
+
+const passwordInput =
+    document.getElementById(
+        "password"
+    );
+
+
+const loginButton =
+    document.getElementById(
+        "loginButton"
+    );
+
+
+const message =
+    document.getElementById(
+        "message"
+    );
+
+
+loginButton.addEventListener(
+    "click",
+    async function() {
+
+        const email =
+            emailInput.value.trim();
+
+        const password =
+            passwordInput.value;
+
+
+        if (!email) {
+
+            message.innerText =
+                "❌ Email ولیکه.";
+
+            return;
+
+        }
+
+
+        if (!password) {
+
+            message.innerText =
+                "❌ Password ولیکه.";
+
+            return;
+
+        }
+
+
+        loginButton.disabled =
+            true;
+
+        loginButton.innerText =
+            "⏳ Login کېږي...";
+
+
+        try {
+
+            await signInWithEmailAndPassword(
+                auth,
+                email,
+                password
+            );
+
+
+            message.innerText =
+                "✅ Login بریالی شو.";
+
+
+            setTimeout(
+                function() {
+
+                    window.location.href =
+                        "index.html";
+
+                },
+                700
+            );
+
+
+        } catch (error) {
+
+            console.error(error);
+
+
+            if (
+                error.code ===
+                "auth/invalid-credential"
+            ) {
+
+                message.innerText =
+                    "❌ Email یا Password غلط دی.";
+
+            } else {
+
+                message.innerText =
+                    "❌ Login ونه شو.";
+
+            }
+
+
+            loginButton.disabled =
+                false;
+
+            loginButton.innerText =
+                "🔐 Login";
+
+        }
+
+    }
+);
+
+</script>
+
+</body>
+
+</html>
