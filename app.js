@@ -15,7 +15,7 @@ import {
 
 
 /* =====================================================
-   HTML
+   ELEMENTS
 ===================================================== */
 
 const micButton =
@@ -39,30 +39,22 @@ const remoteAudio =
 const callButton =
     document.getElementById("callButton");
 
+const createChannelButton =
+    document.getElementById("createChannelButton");
 
-/* =====================================================
-   CHANNEL
-===================================================== */
+const showChannelsButton =
+    document.getElementById("showChannelsButton");
 
-let currentChannel =
-    localStorage.getItem(
-        "currentWalkieChannel"
-    ) || "Afghanistan-1";
-
-if (channelName) {
-    channelName.innerText =
-        currentChannel;
-}
+const languageButton =
+    document.getElementById("languageButton");
 
 
 /* =====================================================
-   USER ID
+   USER
 ===================================================== */
 
 let userId =
-    localStorage.getItem(
-        "walkieUserId"
-    );
+    localStorage.getItem("walkieUserId");
 
 if (!userId) {
 
@@ -76,6 +68,21 @@ if (!userId) {
         "walkieUserId",
         userId
     );
+}
+
+
+/* =====================================================
+   CHANNEL
+===================================================== */
+
+let currentChannel =
+    localStorage.getItem(
+        "currentWalkieChannel"
+    ) || "Afghanistan-1";
+
+if (channelName) {
+    channelName.innerText =
+        currentChannel;
 }
 
 
@@ -99,9 +106,15 @@ let localStream = null;
 
 let currentCallId = null;
 
+let currentRole = null;
+
+let remoteCandidateQueue = [];
+
+let isMicPressed = false;
+
 
 /* =====================================================
-   WEBRTC
+   WEBRTC CONFIG
 ===================================================== */
 
 const rtcConfiguration = {
@@ -149,7 +162,15 @@ async function getMicrophone() {
                 .mediaDevices
                 .getUserMedia({
 
-                    audio: true,
+                    audio: {
+
+                        echoCancellation: true,
+
+                        noiseSuppression: true,
+
+                        autoGainControl: true
+
+                    },
 
                     video: false
 
@@ -161,22 +182,38 @@ async function getMicrophone() {
         );
 
 
+        /*
+         د پیل پر وخت مایک بند ساتو
+        */
+
+        const tracks =
+            localStream.getAudioTracks();
+
+        tracks.forEach(
+            function(track) {
+
+                track.enabled = false;
+
+            }
+        );
+
+
         return localStream;
+
 
     } catch (error) {
 
         console.error(
+            "Microphone error:",
             error
         );
 
         alert(
-            "🎙️ مهرباني وکړئ د مایکروفون اجازه ورکړئ."
+            "🎙️ د مایکروفون اجازه ورکړئ."
         );
 
         return null;
-
     }
-
 }
 
 
@@ -196,15 +233,18 @@ async function createPeerConnection(
     }
 
 
+    currentRole = role;
+
+
     peerConnection =
         new RTCPeerConnection(
             rtcConfiguration
         );
 
 
-    /* ---------------------------------
-       MICROPHONE
-    --------------------------------- */
+    /*
+       Microphone
+    */
 
     if (!localStream) {
 
@@ -232,15 +272,15 @@ async function createPeerConnection(
     }
 
 
-    /* ---------------------------------
-       REMOTE AUDIO
-    --------------------------------- */
+    /*
+       Remote Audio
+    */
 
     peerConnection.ontrack =
         function(event) {
 
             console.log(
-                "🎧 Remote voice received"
+                "🔊 Remote voice received"
             );
 
 
@@ -254,13 +294,16 @@ async function createPeerConnection(
                     event.streams[0];
 
 
+                remoteAudio.muted = false;
+
+
                 remoteAudio
                     .play()
                     .catch(
                         function(error) {
 
                             console.log(
-                                "Audio waiting:",
+                                "Audio play waiting:",
                                 error
                             );
 
@@ -272,9 +315,9 @@ async function createPeerConnection(
         };
 
 
-    /* ---------------------------------
-       ICE CANDIDATE
-    --------------------------------- */
+    /*
+       ICE Candidates
+    */
 
     peerConnection.onicecandidate =
         async function(event) {
@@ -290,22 +333,29 @@ async function createPeerConnection(
 
                 const candidateCollection =
                     collection(
+
                         callRef,
+
                         role === "caller"
                             ? "callerCandidates"
                             : "answererCandidates"
+
                     );
 
 
                 await addDoc(
+
                     candidateCollection,
+
                     event.candidate.toJSON()
+
                 );
 
 
                 console.log(
                     "🧊 ICE candidate saved"
                 );
+
 
             } catch (error) {
 
@@ -319,17 +369,23 @@ async function createPeerConnection(
         };
 
 
-    /* ---------------------------------
-       CONNECTION STATE
-    --------------------------------- */
+    /*
+       Connection State
+    */
 
     peerConnection
         .onconnectionstatechange =
         function() {
 
+            if (!peerConnection) {
+
+                return;
+
+            }
+
+
             const state =
-                peerConnection
-                    .connectionState;
+                peerConnection.connectionState;
 
 
             console.log(
@@ -341,32 +397,28 @@ async function createPeerConnection(
             if (state === "connected") {
 
                 console.log(
-                    "🟢 Voice connected"
+                    "🟢 VOICE CONNECTED"
                 );
+
 
                 if (micText) {
 
                     micText.innerText =
-                        "🟢 Voice Connected";
+                        "🟢 وصل شو — مایک ونیسه";
 
                 }
 
             }
 
 
-            if (state === "disconnected") {
+            if (
+                state === "disconnected" ||
+                state === "failed" ||
+                state === "closed"
+            ) {
 
                 console.log(
-                    "🟡 Voice disconnected"
-                );
-
-            }
-
-
-            if (state === "failed") {
-
-                console.log(
-                    "🔴 Voice failed"
+                    "🔴 Voice disconnected"
                 );
 
             }
@@ -380,7 +432,7 @@ async function createPeerConnection(
 
 
 /* =====================================================
-   WATCH ICE CANDIDATES
+   WATCH REMOTE ICE
 ===================================================== */
 
 function watchRemoteCandidates(
@@ -402,7 +454,9 @@ function watchRemoteCandidates(
 
 
     onSnapshot(
+
         candidatesRef,
+
         async function(snapshot) {
 
             if (!peerConnection) {
@@ -418,8 +472,7 @@ function watchRemoteCandidates(
             ) {
 
                 if (
-                    change.type !==
-                    "added"
+                    change.type !== "added"
                 ) {
 
                     continue;
@@ -433,11 +486,33 @@ function watchRemoteCandidates(
                         change.doc.data();
 
 
+                    const candidate =
+                        new RTCIceCandidate(
+                            data
+                        );
+
+
+                    /*
+                       که Remote Description لا نه وي،
+                       candidate په queue کې ساتو.
+                    */
+
+                    if (
+                        !peerConnection
+                            .remoteDescription
+                    ) {
+
+                        remoteCandidateQueue
+                            .push(candidate);
+
+                        continue;
+
+                    }
+
+
                     await peerConnection
                         .addIceCandidate(
-                            new RTCIceCandidate(
-                                data
-                            )
+                            candidate
                         );
 
 
@@ -458,7 +533,59 @@ function watchRemoteCandidates(
             }
 
         }
+
     );
+
+}
+
+
+/* =====================================================
+   ADD QUEUED ICE
+===================================================== */
+
+async function addQueuedCandidates() {
+
+    if (!peerConnection) {
+
+        return;
+
+    }
+
+
+    if (
+        !peerConnection.remoteDescription
+    ) {
+
+        return;
+
+    }
+
+
+    for (
+        const candidate
+        of remoteCandidateQueue
+    ) {
+
+        try {
+
+            await peerConnection
+                .addIceCandidate(
+                    candidate
+                );
+
+        } catch (error) {
+
+            console.error(
+                "Queued ICE error:",
+                error
+            );
+
+        }
+
+    }
+
+
+    remoteCandidateQueue = [];
 
 }
 
@@ -471,9 +598,15 @@ async function createCall() {
 
     try {
 
-        console.log(
-            "📞 Creating call..."
-        );
+        /*
+           که پخوانی connection وي،
+           لومړی یې بندوه
+        */
+
+        closePeerConnection();
+
+
+        remoteCandidateQueue = [];
 
 
         const callRef =
@@ -496,12 +629,16 @@ async function createCall() {
             );
 
 
-        /* ---------------------------------
-           OFFER
-        --------------------------------- */
+        /*
+           Offer
+        */
 
         const offer =
-            await pc.createOffer();
+            await pc.createOffer({
+
+                offerToReceiveAudio: true
+
+            });
 
 
         await pc.setLocalDescription(
@@ -509,9 +646,9 @@ async function createCall() {
         );
 
 
-        /* ---------------------------------
-           FIREBASE
-        --------------------------------- */
+        /*
+           Call Firestore ته
+        */
 
         await setDoc(
 
@@ -546,15 +683,9 @@ async function createCall() {
         );
 
 
-        console.log(
-            "📞 Call saved:",
-            callRef.id
-        );
-
-
-        /* ---------------------------------
-           WATCH ANSWER
-        --------------------------------- */
+        /*
+           د بل موبایل Answer څارو
+        */
 
         stopCallListener =
             onSnapshot(
@@ -583,9 +714,11 @@ async function createCall() {
 
                             await pc
                                 .setRemoteDescription(
+
                                     new RTCSessionDescription(
                                         data.answer
                                     )
+
                                 );
 
 
@@ -594,15 +727,13 @@ async function createCall() {
                             );
 
 
-                            watchRemoteCandidates(
-                                callRef,
-                                "caller"
-                            );
+                            await addQueuedCandidates();
 
 
                         } catch (error) {
 
                             console.error(
+                                "Remote description error:",
                                 error
                             );
 
@@ -615,9 +746,27 @@ async function createCall() {
             );
 
 
+        /*
+           ICE سمدستي څارو
+        */
+
+        watchRemoteCandidates(
+            callRef,
+            "caller"
+        );
+
+
+        if (micText) {
+
+            micText.innerText =
+                "📞 د بل موبایل د قبول انتظار...";
+
+        }
+
+
         alert(
-            "📞 Call جوړ شو.\n\n" +
-            "اوس دوهم موبایل ته زنګ ښکاري."
+            "📞 Voice Call جوړ شو.\n\n" +
+            "دوهم موبایل دې Call قبول کړي."
         );
 
 
@@ -639,7 +788,7 @@ async function createCall() {
 
 
 /* =====================================================
-   WATCH INCOMING CALLS
+   INCOMING CALLS
 ===================================================== */
 
 function watchIncomingCalls() {
@@ -674,7 +823,9 @@ function watchIncomingCalls() {
 
 
                         if (!data) {
+
                             return;
+
                         }
 
 
@@ -682,7 +833,9 @@ function watchIncomingCalls() {
                             data.channel !==
                             currentChannel
                         ) {
+
                             return;
+
                         }
 
 
@@ -690,7 +843,9 @@ function watchIncomingCalls() {
                             data.caller ===
                             userId
                         ) {
+
                             return;
+
                         }
 
 
@@ -698,7 +853,9 @@ function watchIncomingCalls() {
                             data.status !==
                             "waiting"
                         ) {
+
                             return;
+
                         }
 
 
@@ -728,7 +885,7 @@ function watchIncomingCalls() {
 
 
 /* =====================================================
-   INCOMING CALL
+   SHOW INCOMING CALL
 ===================================================== */
 
 function showIncomingCall(
@@ -738,8 +895,10 @@ function showIncomingCall(
 
     const accepted =
         confirm(
+
             "📞 نوی Voice Call راغلی دی.\n\n" +
             "ایا غواړې Call قبول کړې؟"
+
         );
 
 
@@ -764,10 +923,10 @@ async function answerCall(
 
     try {
 
-        console.log(
-            "📞 Answering:",
-            callId
-        );
+        closePeerConnection();
+
+
+        remoteCandidateQueue = [];
 
 
         const callRef =
@@ -817,9 +976,9 @@ async function answerCall(
             );
 
 
-        /* ---------------------------------
-           OFFER
-        --------------------------------- */
+        /*
+           Offer
+        */
 
         await pc.setRemoteDescription(
 
@@ -830,12 +989,23 @@ async function answerCall(
         );
 
 
-        /* ---------------------------------
-           ANSWER
-        --------------------------------- */
+        /*
+           مخکې راغلي ICE candidates
+        */
+
+        await addQueuedCandidates();
+
+
+        /*
+           Answer
+        */
 
         const answer =
-            await pc.createAnswer();
+            await pc.createAnswer({
+
+                offerToReceiveAudio: true
+
+            });
 
 
         await pc.setLocalDescription(
@@ -843,9 +1013,9 @@ async function answerCall(
         );
 
 
-        /* ---------------------------------
-           SAVE ANSWER
-        --------------------------------- */
+        /*
+           Answer Firebase ته
+        */
 
         await updateDoc(
 
@@ -877,9 +1047,9 @@ async function answerCall(
         );
 
 
-        /* ---------------------------------
-           WATCH CALLER ICE
-        --------------------------------- */
+        /*
+           Caller ICE څارو
+        */
 
         watchRemoteCandidates(
             callRef,
@@ -887,14 +1057,22 @@ async function answerCall(
         );
 
 
+        if (micText) {
+
+            micText.innerText =
+                "🟢 وصل شو — مایک ونیسه";
+
+        }
+
+
         console.log(
-            "✅ Answer saved"
+            "✅ Call answered"
         );
 
 
         alert(
             "✅ Call قبول شو.\n\n" +
-            "د غږ اتصال جوړېږي."
+            "اوس مایک ونیسه او خبرې وکړه."
         );
 
 
@@ -916,7 +1094,210 @@ async function answerCall(
 
 
 /* =====================================================
-   ONLINE USER
+   PUSH TO TALK - START
+===================================================== */
+
+async function startTalking(
+    event
+) {
+
+    if (event) {
+
+        event.preventDefault();
+
+    }
+
+
+    isMicPressed = true;
+
+
+    /*
+       Microphone
+    */
+
+    if (!localStream) {
+
+        localStream =
+            await getMicrophone();
+
+    }
+
+
+    if (!localStream) {
+
+        return;
+
+    }
+
+
+    const track =
+        localStream
+            .getAudioTracks()[0];
+
+
+    if (!track) {
+
+        return;
+
+    }
+
+
+    /*
+       غږ ON
+    */
+
+    track.enabled = true;
+
+
+    if (micButton) {
+
+        micButton.classList.add(
+            "talking"
+        );
+
+    }
+
+
+    if (micText) {
+
+        micText.innerText =
+            "🎙️ خبرې کوه...";
+
+    }
+
+
+    console.log(
+        "🎙️ TALKING"
+    );
+
+}
+
+
+/* =====================================================
+   PUSH TO TALK - STOP
+===================================================== */
+
+function stopTalking(
+    event
+) {
+
+    if (event) {
+
+        event.preventDefault();
+
+    }
+
+
+    isMicPressed = false;
+
+
+    if (!localStream) {
+
+        return;
+
+    }
+
+
+    const track =
+        localStream
+            .getAudioTracks()[0];
+
+
+    if (track) {
+
+        track.enabled = false;
+
+    }
+
+
+    if (micButton) {
+
+        micButton.classList.remove(
+            "talking"
+        );
+
+    }
+
+
+    if (micText) {
+
+        micText.innerText =
+            "🎙️ د خبرو لپاره ونیسه";
+
+    }
+
+
+    console.log(
+        "🔇 TALKING STOPPED"
+    );
+
+}
+
+
+/* =====================================================
+   MIC EVENTS
+===================================================== */
+
+if (micButton) {
+
+
+    /*
+       Android / Touch
+    */
+
+    micButton.addEventListener(
+        "touchstart",
+        startTalking,
+        {
+            passive: false
+        }
+    );
+
+
+    micButton.addEventListener(
+        "touchend",
+        stopTalking,
+        {
+            passive: false
+        }
+    );
+
+
+    micButton.addEventListener(
+        "touchcancel",
+        stopTalking,
+        {
+            passive: false
+        }
+    );
+
+
+    /*
+       Mouse / PC
+    */
+
+    micButton.addEventListener(
+        "mousedown",
+        startTalking
+    );
+
+
+    micButton.addEventListener(
+        "mouseup",
+        stopTalking
+    );
+
+
+    micButton.addEventListener(
+        "mouseleave",
+        stopTalking
+    );
+
+}
+
+
+/* =====================================================
+   CHANNEL ONLINE USER
 ===================================================== */
 
 async function joinOnlineUsers() {
@@ -925,11 +1306,17 @@ async function joinOnlineUsers() {
 
         userDocumentRef =
             doc(
+
                 db,
+
                 "channels",
+
                 currentChannel,
+
                 "users",
+
                 userId
+
             );
 
 
@@ -966,7 +1353,7 @@ async function joinOnlineUsers() {
 
 
 /* =====================================================
-   LEAVE USER
+   LEAVE ONLINE USER
 ===================================================== */
 
 async function leaveOnlineUsers() {
@@ -979,6 +1366,7 @@ async function leaveOnlineUsers() {
                 userDocumentRef
             );
 
+
             userDocumentRef =
                 null;
 
@@ -986,9 +1374,7 @@ async function leaveOnlineUsers() {
 
     } catch (error) {
 
-        console.error(
-            error
-        );
+        console.error(error);
 
     }
 
@@ -1010,10 +1396,15 @@ function watchOnlineUsers() {
 
     const usersRef =
         collection(
+
             db,
+
             "channels",
+
             currentChannel,
+
             "users"
+
         );
 
 
@@ -1024,15 +1415,11 @@ function watchOnlineUsers() {
 
             function(snapshot) {
 
-                const count =
-                    snapshot.size;
-
-
                 if (userCount) {
 
                     userCount.innerText =
                         "👥 " +
-                        count +
+                        snapshot.size +
                         " Users";
 
                 }
@@ -1057,7 +1444,9 @@ async function createChannel() {
 
 
     if (!name) {
+
         return;
+
     }
 
 
@@ -1066,7 +1455,9 @@ async function createChannel() {
 
 
     if (!cleanName) {
+
         return;
+
     }
 
 
@@ -1074,9 +1465,13 @@ async function createChannel() {
 
         const channelRef =
             doc(
+
                 db,
+
                 "channels",
+
                 cleanName
+
             );
 
 
@@ -1088,9 +1483,6 @@ async function createChannel() {
 
                 name:
                     cleanName,
-
-                users:
-                    0,
 
                 createdAt:
                     Date.now()
@@ -1110,9 +1502,7 @@ async function createChannel() {
 
     } catch (error) {
 
-        console.error(
-            error
-        );
+        console.error(error);
 
 
         alert(
@@ -1152,7 +1542,9 @@ function showChannels() {
             function(snapshot) {
 
                 if (!channelsBox) {
+
                     return;
+
                 }
 
 
@@ -1179,10 +1571,9 @@ function showChannels() {
 
 
                         const button =
-                            document
-                                .createElement(
-                                    "button"
-                                );
+                            document.createElement(
+                                "button"
+                            );
 
 
                         button.className =
@@ -1224,10 +1615,14 @@ function showChannels() {
    JOIN CHANNEL
 ===================================================== */
 
-async function joinChannel(name) {
+async function joinChannel(
+    name
+) {
 
     if (!name) {
+
         return;
+
     }
 
 
@@ -1239,8 +1634,11 @@ async function joinChannel(name) {
 
 
     localStorage.setItem(
+
         "currentWalkieChannel",
+
         name
+
     );
 
 
@@ -1257,192 +1655,13 @@ async function joinChannel(name) {
 
     watchOnlineUsers();
 
-
     watchIncomingCalls();
 
 
     alert(
+
         "📻 چینل ته داخل شوې:\n" +
         name
-    );
-
-}
-
-
-/* =====================================================
-   MICROPHONE
-===================================================== */
-
-if (micButton) {
-
-    micButton.addEventListener(
-
-        "click",
-
-        async function() {
-
-            if (!localStream) {
-
-                localStream =
-                    await getMicrophone();
-
-            }
-
-
-            if (!localStream) {
-                return;
-            }
-
-
-            const track =
-                localStream
-                    .getAudioTracks()[0];
-
-
-            if (!track) {
-                return;
-            }
-
-
-            track.enabled =
-                !track.enabled;
-
-
-            if (track.enabled) {
-
-                micButton.classList.add(
-                    "talking"
-                );
-
-
-                if (micText) {
-
-                    micText.innerText =
-                        "🎙️ خبرې کوه...";
-
-                }
-
-            } else {
-
-                micButton.classList.remove(
-                    "talking"
-                );
-
-
-                if (micText) {
-
-                    micText.innerText =
-                        "🎙️ د خبرو لپاره ونیسه";
-
-                }
-
-            }
-
-        }
-
-    );
-
-}
-
-
-/* =====================================================
-   PUSH TO TALK
-===================================================== */
-
-if (micButton) {
-
-    micButton.addEventListener(
-
-        "touchstart",
-
-        async function(event) {
-
-            event.preventDefault();
-
-
-            if (!localStream) {
-
-                localStream =
-                    await getMicrophone();
-
-            }
-
-
-            if (!localStream) {
-                return;
-            }
-
-
-            const track =
-                localStream
-                    .getAudioTracks()[0];
-
-
-            if (track) {
-
-                track.enabled =
-                    true;
-
-            }
-
-
-            micButton.classList.add(
-                "talking"
-            );
-
-
-            if (micText) {
-
-                micText.innerText =
-                    "🎙️ خبرې کوه...";
-
-            }
-
-        }
-
-    );
-
-
-    micButton.addEventListener(
-
-        "touchend",
-
-        function(event) {
-
-            event.preventDefault();
-
-
-            if (!localStream) {
-                return;
-            }
-
-
-            const track =
-                localStream
-                    .getAudioTracks()[0];
-
-
-            if (track) {
-
-                track.enabled =
-                    false;
-
-            }
-
-
-            micButton.classList.remove(
-                "talking"
-            );
-
-
-            if (micText) {
-
-                micText.innerText =
-                    "🎙️ د خبرو لپاره ونیسه";
-
-            }
-
-        }
 
     );
 
@@ -1474,37 +1693,31 @@ if (callButton) {
    CREATE CHANNEL BUTTON
 ===================================================== */
 
-const createChannelButton =
-    document.getElementById(
-        "createChannelButton"
-    );
-
-
 if (createChannelButton) {
 
     createChannelButton.addEventListener(
+
         "click",
+
         createChannel
+
     );
 
 }
 
 
 /* =====================================================
-   SHOW CHANNEL BUTTON
+   SHOW CHANNELS BUTTON
 ===================================================== */
-
-const showChannelsButton =
-    document.getElementById(
-        "showChannelsButton"
-    );
-
 
 if (showChannelsButton) {
 
     showChannelsButton.addEventListener(
+
         "click",
+
         showChannels
+
     );
 
 }
@@ -1513,12 +1726,6 @@ if (showChannelsButton) {
 /* =====================================================
    LANGUAGE
 ===================================================== */
-
-const languageButton =
-    document.getElementById(
-        "languageButton"
-    );
-
 
 if (languageButton) {
 
@@ -1535,6 +1742,63 @@ if (languageButton) {
         }
 
     );
+
+}
+
+
+/* =====================================================
+   CLOSE PEER CONNECTION
+===================================================== */
+
+function closePeerConnection() {
+
+    try {
+
+        if (peerConnection) {
+
+            peerConnection.close();
+
+        }
+
+    } catch (error) {
+
+        console.error(error);
+
+    }
+
+
+    peerConnection =
+        null;
+
+
+    currentCallId =
+        null;
+
+
+    currentRole =
+        null;
+
+
+    remoteCandidateQueue =
+        [];
+
+
+    if (remoteAudio) {
+
+        remoteAudio.srcObject =
+            null;
+
+    }
+
+
+    if (stopCallListener) {
+
+        stopCallListener();
+
+        stopCallListener =
+            null;
+
+    }
 
 }
 
@@ -1564,11 +1828,15 @@ async function startApp() {
 }
 
 
+/* =====================================================
+   PAGE START
+===================================================== */
+
 startApp();
 
 
 /* =====================================================
-   CLOSE
+   PAGE CLOSE
 ===================================================== */
 
 window.addEventListener(
@@ -1577,11 +1845,22 @@ window.addEventListener(
 
     function() {
 
-        if (peerConnection) {
+        if (localStream) {
 
-            peerConnection.close();
+            localStream
+                .getTracks()
+                .forEach(
+                    function(track) {
+
+                        track.stop();
+
+                    }
+                );
 
         }
+
+
+        closePeerConnection();
 
     }
 
