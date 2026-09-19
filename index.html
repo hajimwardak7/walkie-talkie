@@ -11,15 +11,33 @@
 
     <meta
         name="theme-color"
-        content="#07111f">
+        content="#1c0fe7">
+
+    <meta
+        name="description"
+        content="Walkie Talkie - Live Push To Talk Voice Communication">
 
     <title>
         Walkie Talkie
     </title>
 
+
+    <!-- =========================
+         CSS
+    ========================== -->
+
     <link
         rel="stylesheet"
         href="style.css">
+
+
+    <!-- =========================
+         PWA MANIFEST
+    ========================== -->
+
+    <link
+        rel="manifest"
+        href="manifest.json">
 
 </head>
 
@@ -66,7 +84,8 @@
         <button
             id="languageButton"
             class="icon-button"
-            type="button">
+            type="button"
+            aria-label="Language">
 
             🌐
 
@@ -138,7 +157,8 @@
             <button
                 id="logoutButton"
                 class="logout-button"
-                type="button">
+                type="button"
+                aria-label="Logout">
 
                 🚪
 
@@ -222,7 +242,9 @@
 
 
             <span class="channel-live">
+
                 LIVE
+
             </span>
 
 
@@ -230,12 +252,16 @@
 
 
         <h2 id="channelName">
+
             Afghanistan-1
+
         </h2>
 
 
         <p>
+
             د خبرو لپاره په مایکروفون ګوته ونیسئ
+
         </p>
 
 
@@ -244,7 +270,7 @@
 
 
     <!-- =================================================
-         VOICE / PUSH TO TALK
+         PUSH TO TALK
     ================================================== -->
 
     <main class="voice-area">
@@ -270,7 +296,10 @@
         </p>
 
 
-        <!-- MICROPHONE -->
+
+        <!-- =========================
+             MICROPHONE BUTTON
+        ========================== -->
 
         <button
             id="micButton"
@@ -279,16 +308,23 @@
             aria-label="Push To Talk">
 
 
-            <span class="mic-ring ring-one"></span>
+            <span
+                class="mic-ring ring-one">
+            </span>
 
-            <span class="mic-ring ring-two"></span>
+
+            <span
+                class="mic-ring ring-two">
+            </span>
 
 
             <span class="mic-inner">
 
 
                 <span class="mic-icon">
+
                     🎙️
+
                 </span>
 
 
@@ -336,7 +372,9 @@
 
 
             <span class="call-icon">
+
                 📞
+
             </span>
 
 
@@ -344,12 +382,16 @@
 
 
                 <strong>
+
                     Voice Call
+
                 </strong>
 
 
                 <small>
+
                     مستقیم غږیز تماس
+
                 </small>
 
 
@@ -357,7 +399,9 @@
 
 
             <span class="call-arrow">
+
                 ‹
+
             </span>
 
 
@@ -382,7 +426,9 @@
 
 
             <span class="action-icon">
+
                 ＋
+
             </span>
 
 
@@ -390,12 +436,16 @@
 
 
                 <strong>
+
                     نوی چینل
+
                 </strong>
 
 
                 <small>
+
                     Create Channel
+
                 </small>
 
 
@@ -413,7 +463,9 @@
 
 
             <span class="action-icon">
+
                 📻
+
             </span>
 
 
@@ -421,12 +473,16 @@
 
 
                 <strong>
+
                     چینلونه
+
                 </strong>
 
 
                 <small>
+
                     Available Channels
+
                 </small>
 
 
@@ -454,12 +510,16 @@
 
 
                 <h3>
+
                     📻 موجود چینلونه
+
                 </h3>
 
 
                 <p>
+
                     خپل چینل انتخاب کړئ
+
                 </p>
 
 
@@ -467,11 +527,14 @@
 
 
             <span class="channel-count">
+
                 LIVE
+
             </span>
 
 
         </div>
+
 
 
         <div
@@ -481,9 +544,14 @@
 
             <div class="loading-box">
 
-                <span class="loading-spinner"></span>
+
+                <span
+                    class="loading-spinner">
+                </span>
+
 
                 چینلونه لوډ کېږي...
+
 
             </div>
 
@@ -496,7 +564,61 @@
 
 
     <!-- =================================================
-         APP INFO
+         DEVELOPER PROFILE
+    ================================================== -->
+
+    <section class="developer-card">
+
+
+        <div class="developer-avatar">
+
+            👨‍💻
+
+        </div>
+
+
+        <div class="developer-info">
+
+
+            <span class="developer-label">
+
+                Developed By
+
+            </span>
+
+
+            <h2>
+
+                کرامت الله سعید
+
+            </h2>
+
+
+            <p>
+
+                🎙️ Walkie Talkie Developer
+
+            </p>
+
+
+            <a
+                href="tel:+93794175606"
+                class="developer-phone">
+
+                📞 +93794175606
+
+            </a>
+
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- =================================================
+         APP FEATURES
     ================================================== -->
 
     <section class="app-info">
@@ -506,18 +628,25 @@
 
 
             <span class="info-icon">
+
                 🔒
+
             </span>
 
 
             <div>
 
                 <strong>
+
                     Secure
+
                 </strong>
 
+
                 <small>
+
                     خوندي اړیکه
+
                 </small>
 
             </div>
@@ -531,18 +660,25 @@
 
 
             <span class="info-icon">
+
                 ⚡
+
             </span>
 
 
             <div>
 
                 <strong>
+
                     Live
+
                 </strong>
 
+
                 <small>
+
                     چټکه اړیکه
+
                 </small>
 
             </div>
@@ -556,18 +692,25 @@
 
 
             <span class="info-icon">
+
                 🌍
+
             </span>
 
 
             <div>
 
                 <strong>
+
                     Global
+
                 </strong>
 
+
                 <small>
+
                     هر ځای
+
                 </small>
 
             </div>
@@ -607,12 +750,16 @@
 
 
         <p>
+
             Live Voice Communication
+
         </p>
 
 
         <small>
+
             © 2026 Walkie Talkie
+
         </small>
 
 
@@ -624,33 +771,52 @@
 
 
 <!-- =====================================================
-     AUTH + APP
+     FIREBASE AUTH + PROFILE
 ====================================================== -->
 
 <script type="module">
 
+
     import {
+
         getAuth,
+
         onAuthStateChanged,
+
         signOut
+
     }
+
     from
+
     "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 
 
+
     import {
+
         doc,
+
         getDoc
+
     }
+
     from
+
     "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
 
+
     import {
+
         app,
+
         db
+
     }
+
     from "./firebase.js";
+
 
 
     const auth =
@@ -658,26 +824,38 @@
 
 
 
-    /* =================================================
+    /* ================================================
        LOGIN CHECK
     ================================================= */
 
 
     onAuthStateChanged(
+
         auth,
+
         async function(user) {
 
 
+            /* =========================
+               USER NOT LOGGED IN
+            ========================== */
+
             if (!user) {
+
 
                 window.location.href =
                     "login.html";
+
 
                 return;
 
             }
 
 
+
+            /* =========================
+               HTML ELEMENTS
+            ========================== */
 
             const welcomeUser =
                 document.getElementById(
@@ -692,10 +870,16 @@
 
 
 
+            /* =========================
+               FIREBASE AUTH DATA
+            ========================== */
+
             if (userEmail) {
+
 
                 userEmail.innerText =
                     "📧 " + user.email;
+
 
             }
 
@@ -703,20 +887,22 @@
 
             if (welcomeUser) {
 
+
                 welcomeUser.innerText =
                     "👋 سلام " +
                     (
                         user.displayName ||
-                        "کارونکي"
+                        "کارونکی"
                     );
+
 
             }
 
 
 
-            /* =========================================
-               GET PROFILE FROM FIRESTORE
-            ========================================== */
+            /* ========================================
+               FIRESTORE USER PROFILE
+            ========================================= */
 
 
             try {
@@ -724,16 +910,22 @@
 
                 const userRef =
                     doc(
+
                         db,
+
                         "users",
+
                         user.uid
+
                     );
+
 
 
                 const userSnap =
                     await getDoc(
                         userRef
                     );
+
 
 
                 if (
@@ -745,32 +937,43 @@
                         userSnap.data();
 
 
+
                     if (
                         welcomeUser &&
                         data.name
                     ) {
 
+
                         welcomeUser.innerText =
                             "👋 سلام " +
                             data.name;
 
+
                     }
+
 
                 }
 
 
             }
+
             catch (error) {
 
+
                 console.error(
+
                     "Profile Error:",
+
                     error
+
                 );
+
 
             }
 
 
         }
+
     );
 
 
@@ -786,11 +989,14 @@
         );
 
 
+
     if (logoutButton) {
 
 
         logoutButton.addEventListener(
+
             "click",
+
             async function() {
 
 
@@ -801,9 +1007,11 @@
                         true;
 
 
+
                     await signOut(
                         auth
                     );
+
 
 
                     window.location.href =
@@ -811,6 +1019,7 @@
 
 
                 }
+
                 catch (error) {
 
 
@@ -827,13 +1036,17 @@
                         "Logout ونه شو."
                     );
 
+
                 }
 
 
             }
+
         );
 
+
     }
+
 
 </script>
 
@@ -846,6 +1059,75 @@
 <script
     type="module"
     src="app.js">
+</script>
+
+
+
+<!-- =====================================================
+     SERVICE WORKER
+====================================================== -->
+
+<script>
+
+
+if (
+    "serviceWorker"
+    in navigator
+) {
+
+
+    window.addEventListener(
+
+        "load",
+
+        function() {
+
+
+            navigator.serviceWorker
+
+                .register(
+                    "./service-worker.js"
+                )
+
+                .then(
+                    function() {
+
+
+                        console.log(
+
+                            "Service Worker registered successfully."
+
+                        );
+
+
+                    }
+                )
+
+                .catch(
+                    function(error) {
+
+
+                        console.error(
+
+                            "Service Worker registration failed:",
+
+                            error
+
+                        );
+
+
+                    }
+                );
+
+
+        }
+
+    );
+
+
+}
+
+
 </script>
 
 
